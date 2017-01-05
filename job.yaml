@@ -1,0 +1,32 @@
+- job:
+    name: CTSBank_1
+    project-type: freestyle
+    defaults: global
+    description: 'Build and Deploy of petsclinc via JJB -Branch arunesh'
+    block-downstream: true
+    block-upstream: true
+    concurrent: false
+    node: master
+    properties:
+       - github:
+          url: https://github.com/devopsbasservice/CTSBank
+    scm:
+       - git:
+          url: https://github.com/devopsbasservice/CTSBank
+          branches:
+            - refs/heads/master
+          git-config-name: Arunesh
+          git-config-email: arunesh.m@cognizant.com
+          force-polling-using-workspace: true
+          extensions:
+            per-build-tag: false          
+    triggers:
+       - pollscm:
+          cron: "* * * * *"
+          ignore-post-commit-hooks: True
+    builders:
+       - msbuild:
+            solution-file: $WORKSPACE\website.publishproj           
+
+- docker_image:
+    name: devopsbasservice/basejenkins_maven_git_java

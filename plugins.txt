@@ -1,0 +1,12 @@
+msbuild:1.26
+swarm:2.0
+git:2.4.2
+git-client:1.19.3
+github:1.20.0
+github-api:1.76
+docker-plugin:0.16.0
+ssh-slaves:1.9
+durable-task:1.9
+rundeck:3.5.1
+sonar:2.3
+

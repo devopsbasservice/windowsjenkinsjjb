@@ -1,0 +1,47 @@
+import jenkins.model.*
+import hudson.util.VersionNumber
+import java.util.logging.Logger
+
+def logger = Logger.getLogger("")
+def installed = false
+def initialized = false
+
+def pluginParameter = new File('C:/Users/ContainerAdministrator/.jenkins/init.groovy.d/plugins.txt').text
+def plugins = pluginParameter.split()
+logger.info("" + plugins)
+def instance = Jenkins.getInstance()
+def pm = instance.getPluginManager()
+def uc = instance.getUpdateCenter()
+uc.updateAllSites()
+
+plugins.each {
+    def (pluginName, version) = it.tokenize( ':' )
+    def checkVersion = new VersionNumber(!version?"latest":version)
+  
+    logger.info("Checking " + pluginName + " Version:" + checkVersion)
+    def pl = pm.getPlugin(pluginName);
+    if (!pl || (pl.hasUpdate() && ( pl.isOlderThan(checkVersion) || checkVersion.toString()=="latest" ) ) ) {
+        logger.info("\tLooking at UpdateCenter for: " + pluginName)
+        if (!initialized) {
+            uc.updateAllSites()
+            initialized = true
+        }
+
+        def plugin = uc.getPlugin(pluginName)
+        if (plugin) {
+            logger.info( "\t" +(pl && pl.hasUpdate()?"Updating ":"Installing ") + pluginName)
+            def exec = plugin.deploy()
+            while( !exec.isDone() ) {
+                sleep(100)
+            }
+
+            logger.info( "\tDone for " + pluginName)
+            installed = true
+        }
+    }
+}
+    
+if (installed) {
+    logger.info("Plugins installed, initializing a restart!")
+    instance.save()        
+}
